@@ -5,7 +5,6 @@ variables:
   CI_NAME: Azure Pipelines
   CI_BUILD_ID: $(Build.BuildId)
   CI_BUILD_URL: "https://toxdev.visualstudio.com/tox/_build/results?buildId=$(Build.BuildId)"
-  GIT_BRANCH: $(Build.SourceBranchName)
   GIT_COMMIT_SHA: $(Build.SourceVersion)
   PYTEST_ADDOPTS: "-vv -ra --showlocals"
 
@@ -34,6 +33,7 @@ jobs:
   steps:
   - script: echo start
   - script: |
+      export GIT_BRANCH=$( [[ $(Build.SourceBranch) == refs/head/* ]] && echo $(Build.SourceBranchName) || echo $(Build.SourceBranch) ) && printenv && \
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && \
       chmod +x ./cc-test-reporter && \
       ./cc-test-reporter before-build -d
@@ -140,6 +140,7 @@ jobs:
       failIfCoverageEmpty: true
 
   - script: |
+      export GIT_BRANCH=$( [[ $(Build.SourceBranch) == refs/head/* ]] && echo $(Build.SourceBranchName) || echo $(Build.SourceBranch) ) && printenv && \
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && \
       chmod +x ./cc-test-reporter && \
       python -c '
