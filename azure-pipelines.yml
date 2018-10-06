@@ -5,8 +5,7 @@ variables:
   CI_NAME: Azure Pipelines
   CI_BUILD_ID: $(Build.BuildId)
   CI_BUILD_URL: "https://toxdev.visualstudio.com/tox/_build/results?buildId=$(Build.BuildId)"
-  GIT_BRANCH: $(Build.SourceBranchName)
-  GIT_COMMIT_SHA: $(Build.SourceVersion)
+  GIT_COMMIT_SHA: $(System.PullRequest.SourceCommitId)
   PYTEST_ADDOPTS: "-vv -ra --showlocals"
 
 trigger:
@@ -34,11 +33,11 @@ jobs:
   steps:
   - script: echo start
   - script: |
+      export GIT_BRANCH=$( [[ $(Build.SourceBranch) == refs/head/* ]] && echo $(Build.SourceBranchName) || echo $(System.PullRequest.SourceBranch) ) && printenv && \
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && \
       chmod +x ./cc-test-reporter && \
       ./cc-test-reporter before-build -d
     displayName: notify code climate of new build
-    condition: eq(variables['system.pullrequest.isfork'], false)
 
 - template: azure-run-tox-env.yml
   parameters: {tox: fix_lint, python: 3.7}
@@ -79,7 +78,6 @@ jobs:
 
 - job: report_coverage
   pool: {vmImage: 'Ubuntu 16.04'}
-  condition: eq(variables['system.pullrequest.isfork'], false)
   dependsOn:
   - windows_py37
   - windows_py36
@@ -140,6 +138,7 @@ jobs:
       failIfCoverageEmpty: true
 
   - script: |
+      export GIT_BRANCH=$( [[ $(Build.SourceBranch) == refs/head/* ]] && echo $(Build.SourceBranchName) || echo $(System.PullRequest.SourceBranch) ) && printenv && \
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter && \
       chmod +x ./cc-test-reporter && \
       python -c '

@@ -47,7 +47,7 @@ jobs:
   - script: ${{ format('python -m tox -e {0}', parameters.tox) }}
     displayName: run tests
 
-  - ${{ if and( startsWith(parameters.tox, 'py'), eq(variables['system.pullrequest.isfork'], false) ) }}:
+  - ${{ if startsWith(parameters.tox, 'py') }}:
     - task: PublishTestResults@2
       displayName: publish test results via junit
       condition: succeededOrFailed()
@@ -61,7 +61,7 @@ jobs:
       displayName: create coverag report
       condition: succeededOrFailed()
 
-  - ${{ if and( startsWith(parameters.tox, 'py'), eq(variables['system.pullrequest.isfork'], false) ) }}:
+  - ${{ if startsWith(parameters.tox, 'py') }}:
     - task: CopyFiles@2
       displayName: move coverage files into staging area
       condition: succeededOrFailed()
